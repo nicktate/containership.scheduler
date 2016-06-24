@@ -357,7 +357,13 @@ var commands = {
             args.push("--HostConfig.Binds");
 
             var volumes = _.map(options.volumes, function(volume){
-                return [volume.host, volume.container].join(":");
+                var volumeArg = [volume.host, volume.container].join(":");
+
+                if (volume.propogation) {
+                    volumeArg = [volumeArg, volume.propogation].join(":");
+                }
+
+                return volumeArg;
             });
 
             args.push(volumes.join(" "));
