@@ -318,6 +318,8 @@ var commands = {
 
     // pull docker image
     pull: function(image, auth, fn){
+        var self = this;
+
         async.eachSeries(auth, function(authentication, fn){
             docker.pull(image, authentication, function(err, stream){
                 if(err) {
