@@ -320,8 +320,12 @@ var commands = {
     pull: function(image, auth, fn){
         async.eachSeries(auth, function(authentication, fn){
             docker.pull(image, authentication, function(err, stream){
-                if(err)
-                    return fn(err);
+                if(err) {
+                    self.core.loggers["containership.scheduler"].log("warn", "Failed to pull docker image: " + err);
+
+                    // don't error because we need to continue checking the rest of the registries
+                    return fn();
+                }
 
                 docker.modem.followProgress(stream, onFinished, onProgress);
 
@@ -330,7 +334,7 @@ var commands = {
                 }
                 function onProgress(){}
             });
-        }, function(){
+        }, function() {
             return fn();
         });
     },

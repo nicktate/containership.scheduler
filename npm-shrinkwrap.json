@@ -35,7 +35,14 @@
     "follow-redirects": {
       "version": "0.0.3",
       "from": "follow-redirects@0.0.3",
-      "resolved": "https://registry.npmjs.org/follow-redirects/-/follow-redirects-0.0.3.tgz"
+      "resolved": "https://registry.npmjs.org/follow-redirects/-/follow-redirects-0.0.3.tgz",
+      "dependencies": {
+        "underscore": {
+          "version": "1.8.3",
+          "from": "underscore@latest",
+          "resolved": "https://registry.npmjs.org/underscore/-/underscore-1.8.3.tgz"
+        }
+      }
     },
     "forever-monitor": {
       "version": "1.5.2",
@@ -416,11 +423,6 @@
       "version": "2.3.8",
       "from": "through@>=2.2.7 <3.0.0",
       "resolved": "https://registry.npmjs.org/through/-/through-2.3.8.tgz"
-    },
-    "underscore": {
-      "version": "1.8.3",
-      "from": "underscore@latest",
-      "resolved": "https://registry.npmjs.org/underscore/-/underscore-1.8.3.tgz"
     }
   }
 }
