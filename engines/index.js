@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = {
-    docker: require([__dirname, "docker"].join("/"))
-}
+    docker: require('./docker')
+};

@@ -1,11 +1,13 @@
-var ContainershipScheduler = require([__dirname, "containership-scheduler"].join("/"));
-var pkg = require([__dirname, "package"].join("/"));
-var options = require([__dirname, "options"].join("/"));
+'use strict';
+
+const ContainershipScheduler = require('./containership-scheduler');
+const pkg = require('./package.json');
+const options = require('./options');
 
 // instantiate new Containership Scheduler
-module.exports = function(){
-    var scheduler = new ContainershipScheduler();
+module.exports = function() {
+    let scheduler = new ContainershipScheduler();
     scheduler.version = pkg.version;
     scheduler.options = options;
     return scheduler;
-}
+};

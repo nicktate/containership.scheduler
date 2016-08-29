@@ -2,6 +2,7 @@ build:
   image: library/node:6.3.0
   commands:
     - npm install
+    - npm run lint
     - npm test
 
 notify:
