@@ -318,12 +318,12 @@ var commands = {
 
     // pull docker image
     pull: function(image, auth, fn){
-        var self = this;
+        var core = module.exports.core;
 
         async.eachSeries(auth, function(authentication, fn){
             docker.pull(image, authentication, function(err, stream){
                 if(err) {
-                    self.core.loggers["containership.scheduler"].log("warn", "Failed to pull docker image: " + err);
+                    core.loggers["containership.scheduler"].log("warn", "Failed to pull docker image: " + err);
 
                     // don't error because we need to continue checking the rest of the registries
                     return fn();
