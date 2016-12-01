@@ -42,7 +42,7 @@ class DockerEngine extends Engine {
             'volumes': (v) => ({
                 'HostConfig': {
                     'Binds': _.map(v, (volume) => {
-                        return _.join(volume.propogation ? 
+                        return _.join(volume.propogation ?
                             [volume.host, volume.container, volume.propogation]:
                             [volume.host, volume.container], ':')
                     }),
@@ -52,7 +52,7 @@ class DockerEngine extends Engine {
                         return vol;
                     }))
                 }
-            }), 
+            }),
 
             'host_port': (v) => {
                 const portBindings = {};
@@ -101,7 +101,7 @@ class DockerEngine extends Engine {
 
         setTimeout(() => {
             this.reconcile();
-        }, 2000); 
+        }, 2000);
 
         setInterval(() => {
             this.runDockerCustodian();
@@ -123,7 +123,15 @@ class DockerEngine extends Engine {
                 }
 
                 this.log('info', `Docker-Custodian pulled well`);
-                docker.run('yelp/docker-custodian', ['dcgc', '--max-container-age', '6hours', '--max-image-age', '6hours'], process.stdout, {
+                const run_opts = [
+                    'dcgc',
+                    '--max-container-age',
+                    `${this.core.options['max-docker-container-age']}hours`,
+                    '--max-image-age',
+                    `${this.core.options['max-docker-image-age']}hours`
+                ];
+
+                docker.run('yelp/docker-custodian', run_opts, process.stdout, {
                     Binds: ['/var/run/docker.sock:/var/run/docker.sock']
                 }, (err, data, container) => {
                     if(err) {
@@ -195,7 +203,7 @@ class DockerEngine extends Engine {
     }
 
     trackContainer(container, id, applicationName, respawn) {
-        this.containers[id] = container; 
+        this.containers[id] = container;
 
         container.wait(() => this.cleanupContainer(container, id, applicationName, respawn));
 
@@ -223,7 +231,7 @@ class DockerEngine extends Engine {
         const prePullMiddleware = _.mapValues(this.middleware.prePull, withOptions);
         const preStartMiddleware = _.mapValues(this.middleware.preStart, withOptions);
 
-        const attrs = this.core.cluster.legiond.get_attributes(); 
+        const attrs = this.core.cluster.legiond.get_attributes();
         const unloadContainer = () => {
             Utils.setContainerMyriadStateUnloaded(this.core, {
                 container_id: options.id,
@@ -305,7 +313,7 @@ class DockerEngine extends Engine {
         //List running containers.
         docker.listContainers({all: true}, (err, containersOnHost) => {
             containersOnHost = containersOnHost || [];
-            const attrs = this.core.cluster.legiond.get_attributes(); 
+            const attrs = this.core.cluster.legiond.get_attributes();
 
             async.each(containersOnHost, (containerState, fn) => {
                 //Remove the preceeding / from the container name.
@@ -316,7 +324,7 @@ class DockerEngine extends Engine {
                     return fn();
                 }
 
-                const parts = name.split('-'); 
+                const parts = name.split('-');
                 const applicationName = _.take(parts, parts.length - 5).join('-');
                 const containerId = _.takeRight(parts, 5).join('-');
 
