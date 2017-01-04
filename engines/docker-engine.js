@@ -13,15 +13,17 @@ const Utils = require('../lib/utils');
 const docker = new Docker();
 
 class DockerEngine extends Engine {
-
     static universalOptionsToDocker(options) {
 
-        //If no container_port is provided, default to host_port.
-        options = _.defaults(options, {
-            container_port: options.host_port
+        // If no container_port is provided, default to host_port.
+        options = _.defaultsDeep(options, {
+            container_port: options.host_port,
+            start_args: {
+                'HostConfig.LogConfig.Type': 'none'
+            }
         });
 
-        const mapping = {
+        let mapping = {
             'cpus':             (v) => ({'HostConfig': {'CpuShares': Math.floor(v * 1024)}}),
             'memory':           (v) => ({'HostConfig': {'Memory': v * 1024 * 1024}}),
             'image':            (v) => ({'Image':v}),
@@ -29,7 +31,6 @@ class DockerEngine extends Engine {
             'network_mode':     (v) => ({'HostConfig': {'NetworkMode': v}}),
             'application_name': (v) => ({'name': `${v}-${options.id}`}),
             'command':          (v) => !_.isEmpty(v) ? {'Cmd': _.split(v, ' ')} : {},
-            'start_args':       (v) => flat.unflatten(v),
 
             'env_vars': (v) => ({
                 'Env': _.map(_.merge(v, {
@@ -64,15 +65,28 @@ class DockerEngine extends Engine {
 
                 return {
                     'HostConfig': {
-                        'PortBindings': portBindings,
-                        'ExposedPorts': exposedPorts
-                    }
+                        'PortBindings': portBindings
+                    },
+                    'ExposedPorts': exposedPorts
                 }
             }
 
         };
 
-        return _.merge.apply(null, _.map(options, (v,k) => (mapping[k] ? mapping[k](v): null)));
+        mapping = _.merge.apply(null, _.map(options, (v,k) => (mapping[k] ? mapping[k](v): null)));
+
+        // merge in additional start aguments to the options mapping
+        // start argument values may have been set as functions
+        // expecting to be invoked with the existing options
+        let start_args = flat.flatten(options.start_args);
+        start_args = _.reduce(start_args, (accumulator, value, key) => {
+            accumulator[key] = Utils.safeJsonParse(typeof value === 'function' ? value(mapping) : value);
+            return accumulator;
+        }, {});
+        start_args = flat.unflatten(start_args);
+        mapping = _.merge(mapping, start_args);
+
+        return mapping;
     }
 
     initialize() {
@@ -271,6 +285,7 @@ class DockerEngine extends Engine {
                                                 Utils.updateContainerMyriadState(this.core, {
                                                     application_name: options.application_name,
                                                     container_id: options.id,
+                                                    host_port: options.host_port,
                                                     status: 'loaded'
                                                 }, (err) => {
                                                     if(err) {
