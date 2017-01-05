@@ -292,7 +292,13 @@ class DockerEngine extends Engine {
                                                         this.log('warn', `Failed to set loaded state on ${options.application_name} container ${options.id}`);
                                                         this.log('error', err.message);
 
-                                                        this.containers[options.id].stop();
+                                                        this.containers[options.id].stop((err) => {
+                                                            if (err) {
+                                                                return this.log('error', `Failed to stop container ${options.id}: ${err}`);
+                                                            }
+
+                                                            this.log('info', `Sucessfully stopped container ${options.id}`);
+                                                        });
                                                     }
                                                 });
                                             } else {
@@ -317,7 +323,13 @@ class DockerEngine extends Engine {
 
     stop(options) {
         if(_.has(this.containers, options.container_id)) {
-            this.containers[options.container_id].stop();
+            this.containers[options.container_id].stop((err) => {
+                if (err) {
+                    return this.log('error', `Failed to stop container ${options.container_id}: ${err}`);
+                }
+
+                this.log('info', `Sucessfully stopped container ${options.container_id}`);
+            });
         } else {
             this.log('error', `Attempted to stop an untracked container ${options.container_id}.`);
         }
