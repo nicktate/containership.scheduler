@@ -41,8 +41,7 @@ nomnom.command("start").options({
         required: true
     },
     "HostConfig.LogConfig.Type": {
-        required: false,
-        default: 'none'
+        required: false
     }
 }).callback(function(options){
     var opts = flat.unflatten(options);
