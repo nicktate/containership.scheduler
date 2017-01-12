@@ -17,10 +17,7 @@ class DockerEngine extends Engine {
 
         // If no container_port is provided, default to host_port.
         options = _.defaultsDeep(options, {
-            container_port: options.host_port,
-            start_args: {
-                'HostConfig.LogConfig.Type': 'none'
-            }
+            container_port: options.host_port
         });
 
         let mapping = {
