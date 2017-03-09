@@ -215,21 +215,23 @@ class DockerEngine extends Engine {
 
         container.wait(() => this.cleanupContainer(container, id, applicationName, respawn));
 
-        container.attach({stream: true, stdout: true, stderr: true}, (err, stream) => {
-            if(err) {
-                this.log('error', `Error attaching to tracked container ${id}: ${err}`);
-            } else {
-                const logDir =  `${this.core.options['base-log-dir']}/applications/${applicationName}/${id}`;
-                mkdirp(logDir, (err) => {
-                    if(err) {
-                        this.log('error', `Error creating log directory ${logDir}: ${err}`);
-                    }
+        const logDir =  `${this.core.options['base-log-dir']}/applications/${applicationName}/${id}`;
 
+        return mkdirp(logDir, (err) => {
+            if(err) {
+                this.log('error', `Error creating log directory ${logDir}: ${err}`);
+                return;
+            }
+
+            container.attach({stream: true, stdout: true, stderr: true}, (err, stream) => {
+                if(err) {
+                    this.log('error', `Error attaching to tracked container ${id}: ${err}`);
+                } else {
                     const stdout = !err ? fs.createWriteStream(`${logDir}/stdout`) : process.stdout;
                     const stderr = !err ? fs.createWriteStream(`${logDir}/stderr`) : process.stderr;
                     container.modem.demuxStream(stream, stdout, stderr);
-                });
-            }
+                }
+            });
         });
     }
 
