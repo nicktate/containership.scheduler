@@ -25,6 +25,10 @@ class DockerEngine extends Engine {
             return -key.length;
         });
 
+        const user_variables = _.sortBy(_.keys(options.user_variables), (key) => {
+            return -key.length;
+        });
+
         let mapping = {
             'cpus':             (v) => ({'HostConfig': {'CpuShares': Math.floor(v * 1024)}}),
             'memory':           (v) => ({'HostConfig': {'Memory': v * 1024 * 1024}}),
@@ -39,9 +43,20 @@ class DockerEngine extends Engine {
                     PORT: options.container_port,
                 }), (v,k) => {
                     v = v.toString();
+                    const user_variable_prefix = 'CS_USER_VARIABLE';
+                    if(v.indexOf(`$${user_variable_prefix}`) !== -1) {
+                        _.forEach(user_variables, (_key) => {
+                            if(v.indexOf(`$${_key}`) !== -1) {
+                                const pattern = new RegExp(`$${_key}`, 'g');
+                                v = v.replace(pattern, options.user_variables[_key]);
+                            }
+                        });
+                    }
+
                     _.forEach(keys, (_key) => {
                         if(v.indexOf(`$${_key}`) !== -1) {
-                            v = v.replace(`$${_key}`, options.env_vars[_key]);
+                            const pattern = new RegExp(`$${_key}`, 'g');
+                            v = v.replace(pattern, options.env_vars[_key]);
                         }
                     });
 
