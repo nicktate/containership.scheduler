@@ -67,10 +67,11 @@ class DockerEngine extends Engine {
             'host_port': (v) => {
                 const portBindings = {};
                 const exposedPorts = {};
-                portBindings[`${options.container_port}/tcp`] = [{
+                const container_port = _.includes(options.container_port, '/') ? options.container_port : `${options.container_port}/tcp`;
+                portBindings[container_port] = [{
                     'HostPort': v.toString()
                 }];
-                exposedPorts[`${options.container_port}/tcp`] = {};
+                exposedPorts[container_port] = {};
 
                 return {
                     'HostConfig': {
